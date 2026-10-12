@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>FUN PLAY 3D</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;color:#fff;background:linear-gradient(135deg,#180b40,#075c9e,#08a9b7);min-height:100vh}
+header{position:sticky;top:0;background:#160d45;padding:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;z-index:5}.logo{font-size:24px;font-weight:bold;color:#ffe34d}.pill{background:#ffffff22;padding:8px;border-radius:20px;display:inline-block;margin:2px}
+main{max-width:1000px;margin:auto;padding:12px}.hero,.panel,.card{background:#ffffff18;border:1px solid #ffffff40;border-radius:18px;padding:16px;margin:12px 0;text-align:center}.hero h1{color:#ffe34d;font-size:clamp(28px,6vw,46px)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}.card h3{color:#ffe34d}.emoji{font-size:42px}
+button,select{font-size:16px;border:0;border-radius:11px;padding:11px 14px;margin:4px;cursor:pointer;font-weight:bold}.btn{background:#ffe34d;color:#27134c}.secondary{background:#ffffff25;color:white;border:1px solid #ffffff60}.pink{background:#ff76a5;color:#381035}button:disabled{opacity:.45;cursor:not-allowed}.age.active{background:#ff76a5;outline:2px solid #ffe34d}.hidden{display:none!important}.question{font-size:clamp(24px,5vw,38px);font-weight:bold;margin:25px 0}.answers{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}.answers button{max-width:100%;overflow-wrap:anywhere}.feedback{min-height:42px;color:#fff2a6;font-weight:bold;padding:10px}.progress{height:10px;background:#ffffff30;border-radius:12px;overflow:hidden}.progress span{display:block;height:100%;width:0;background:#ffe34d}.small{font-size:13px}.gameCanvasWrap{position:relative;width:100%;max-width:760px;margin:10px auto;border-radius:16px;overflow:hidden;border:2px solid #ffffff80;background:#07172c}.gameCanvasWrap canvas{display:block;width:100%;height:auto;touch-action:pan-y}.hud{position:absolute;left:8px;right:8px;top:8px;display:flex;justify-content:space-between;gap:5px;pointer-events:none;text-shadow:0 2px 4px #000;font-weight:bold}.controls{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}.hint{font-size:14px;opacity:.9}
+</style>
+</head>
+<body>
+<header>
+ <div class="logo">🎮 FUN PLAY 3D</div>
+ <div><span class="pill">🪙 <b id="coins">0</b></span><span class="pill">⭐ XP <b id="xp">0</b></span><span class="pill">🏆 Level <b id="level">1</b></span></div>
+ <select id="language" onchange="changeLanguage()"><option value="hi">हिंदी</option><option value="en">English</option><option value="bi">हिंदी + English</option></select><button class="secondary" onclick="openLogin()" id="accountBtn">👤 Login</button><button class="pink" onclick="openAdmin()">🛡️ Admin</button>
+</header>
+<main>
+<section id="loginPanel" class="panel hidden"><h1>👋 Welcome to FUN PLAY</h1><p id="loginHint">अपना प्रोफाइल खोलें या नया प्रोफाइल बनाएं</p><label>Player name / खिलाड़ी का नाम</label><br><input id="playerName" maxlength="30" placeholder="Your name" style="padding:12px;border-radius:10px;width:min(90%,340px);margin:8px"><br><label>Age / उम्र</label><br><select id="profileAge"><option>6</option><option>7</option><option>8</option><option>9</option><option selected>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option></select><div><button class="btn" onclick="guestLogin()">▶ Continue as Player</button></div><div><button class="secondary" onclick="googleLogin()">🌐 Continue with Google</button><button class="secondary" onclick="showPhoneLogin()">📱 Phone OTP</button></div><div id="phoneArea" class="hidden"><div id="recaptcha-container"></div><input id="phoneNumber" inputmode="tel" placeholder="+91 Mobile number" style="padding:12px;border-radius:10px;width:min(90%,300px);margin:6px"><button class="btn" onclick="requestOtp()">Send OTP</button><p id="otpNote" class="small"></p><input id="otpCode" inputmode="numeric" placeholder="Enter OTP" style="padding:12px;border-radius:10px;width:min(90%,200px);margin:6px"><button class="btn" onclick="verifyOtp()">Verify OTP</button></div><p class="small">Google/Phone login connects to your Firebase project after you paste your Web App config below in the Firebase setup section.</p><button class="secondary" onclick="goHome()">Continue without login / बिना लॉगिन</button></section>
+<section id="home">
+ <div class="hero"><div class="emoji">🦸 🦊 🐼</div><h1>WELCOME TO FUN PLAY!</h1><h2 id="welcome">खेलो भी, सीखो भी! 🚀</h2><p id="intro">अपनी उम्र चुनें और पढ़ाई को मजेदार बनाएं।</p>
+ <h3>अपनी उम्र चुनें / Choose your age</h3><div id="ages"></div><p id="ageInfo"></p>
+ <button class="btn" onclick="document.getElementById('subjects').scrollIntoView({behavior:'smooth'})">🚀 PLAY NOW</button></div>
+ <div class="card"><h3>👤 Player Dashboard / खिलाड़ी डैशबोर्ड</h3><p><b id="dashName">Guest Player</b> • <span id="dashAge">Age 8</span></p><div class="grid"><div class="card"><h3>🪙 Coins</h3><p id="dashCoins">0</p></div><div class="card"><h3>⭐ XP</h3><p id="dashXP">0</p></div><div class="card"><h3>🏆 Level</h3><p id="dashLevel">1</p></div><div class="card"><h3>✅ Correct answers</h3><p id="dashCorrect">0</p></div></div><button class="secondary" onclick="openLogin()">Switch / Edit Profile</button></div><div class="card"><h3>⭐ आपका एडवेंचर</h3><p id="progressText">0 / 100 XP</p><div class="progress"><span id="bar"></span></div><p>हर सही जवाब पर 10 XP। 100 XP पर अगला लेवल!</p><p id="unlockText">3D Fun Game Level 21 पर खुलेगा।</p><button class="pink" onclick="openRunner()">🏃 3D FUN GAME ZONE</button><p class="small">3D बोनस गेम कुल 3 बार ही खेल सकते हैं। पढ़ाई वाले गेम हमेशा उपलब्ध हैं।</p></div>
+ <h2>📚 विषय चुनें / Choose a subject</h2><div class="grid" id="subjects"></div>
+</section>
+<section id="quiz" class="panel hidden"><h2 id="quizTitle">📚 Quiz</h2><p id="questionInfo"></p><div class="question" id="question"></div><div class="answers" id="answers"></div><div class="feedback" id="feedback"></div>
+ <button class="secondary" onclick="previousQuestion()">⬅ Previous</button><button class="btn" onclick="nextQuestion()">Next ➡</button><button id="finishBtn" class="pink hidden" onclick="finishQuiz()">🏁 Finish</button><button class="secondary" onclick="goHome()">🏠 Home</button></section>
+<section id="result" class="panel hidden"><div class="emoji">🎉 🏆 🎉</div><h1>गेम पूरा हुआ!</h1><p id="resultText"></p><p>🪙 इस राउंड में मिले: <b id="earnedCoins">0</b></p><p>⭐ इस राउंड में XP: <b id="earnedXP">0</b></p><button class="btn" onclick="playAgain()">🔄 फिर खेलें</button><button class="pink" onclick="goHome()">📚 दूसरा विषय</button></section>
+<section id="runner" class="panel hidden"><h1>🏃 3D COIN RUNNER</h1><p id="runnerStatus">Level 21+ पर अनलॉक होगा।</p><p class="hint">दौड़ते हुए बाधाओं से बचें और कॉइन इकट्ठा करें। मोबाइल पर नीचे बटन या स्क्रीन पर बाएँ/दाएँ स्वाइप करें।</p>
+ <div class="gameCanvasWrap"><canvas id="gameCanvas" width="720" height="480"></canvas><div class="hud"><span id="runScore">🪙 0</span><span id="runLives">❤️❤️❤️</span><span id="runTime">🏁 Ready</span></div></div>
+ <div class="controls"><button class="secondary" onclick="moveRunner(-1)">⬅ LEFT</button><button class="btn" id="startRunBtn" onclick="startRunner()">▶ START / RETRY</button><button class="secondary" onclick="moveRunner(1)">RIGHT ➡</button></div>
+ <p id="runMessage">एक रन = एक मौका। कुल 3 मौके।</p><button class="secondary" onclick="goHome()">🏠 Home</button></section>
+<section id="adminPanel" class="panel hidden">
+ <h1>🛡️ Admin Control Panel</h1>
+ <p>सभी रिकॉर्ड, स्कोर, जवाब, लेवल और गेम सेशन देखें। / Review recorded scores, answers, levels and game sessions.</p>
+ <div class="grid">
+  <div class="card"><h3>👥 Players</h3><p id="adminPlayers">0</p></div>
+  <div class="card"><h3>🎮 Sessions</h3><p id="adminSessions">0</p></div>
+  <div class="card"><h3>✅ Correct Answers</h3><p id="adminCorrect">0</p></div>
+  <div class="card"><h3>🪙 Coins Earned</h3><p id="adminCoins">0</p></div>
+ </div>
+ <input id="adminSearch" placeholder="Search player / खिलाड़ी खोजें" oninput="renderAdminTable()" style="padding:12px;border-radius:10px;width:min(95%,380px);margin:8px">
+ <div class="controls"><button class="btn" onclick="exportAdminCSV()">⬇ Export CSV</button><button class="secondary" onclick="renderAdminTable()">🔄 Refresh</button><button class="secondary" onclick="goHome()">🏠 Home</button></div>
+ <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:680px;text-align:left"><thead><tr><th style="padding:8px">Date</th><th style="padding:8px">Player</th><th style="padding:8px">Age</th><th style="padding:8px">Game / Subject</th><th style="padding:8px">Score</th><th style="padding:8px">Coins</th><th style="padding:8px">XP</th><th style="padding:8px">Details</th></tr></thead><tbody id="adminRows"></tbody></table></div>
+ <p class="small">Online player/session records require Firebase config. Cloud-wide admin reports are restricted to an authenticated account with the Firebase custom claim <code>admin=true</code>; never rely on a client-side PIN for security.</p>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const defaultData={age:8,lang:"hi",coins:0,xp:0,level:1,subject:"math",questions:[],index:0,answers:{},correct:0,totalCorrect:0,roundCoins:0,roundXP:0,bonusPlays:3,runnerCoins:0,playerName:"Guest Player",loggedIn:false};
+let data={...defaultData};
+try{const s=JSON.parse(localStorage.getItem("FUNPLAY3D_SAVE"));if(s)data={...data,...s};}catch(e){}
+const subjects=[
+{id:"math",emoji:"➕",hi:"मैथ्स",en:"Maths",desc:"गणित"},
+{id:"science",emoji:"🔬",hi:"साइंस",en:"Science",desc:"विज्ञान"},
+{id:"english",emoji:"🔤",hi:"इंग्लिश",en:"English",desc:"अंग्रेजी"},
+{id:"hindi",emoji:"📖",hi:"हिंदी",en:"Hindi",desc:"हिंदी भाषा"},
+{id:"grammar",emoji:"📝",hi:"हिंदी ग्रामर",en:"Hindi Grammar",desc:"व्याकरण"}];
+const bank={
+math:[
+["3 + 4 = ?",["5","7","8","9"],"7","3 + 4 = 7"],["10 - 6 = ?",["2","3","4","5"],"4","10 - 6 = 4"],["2 × 5 = ?",["7","10","12","15"],"10","2 × 5 = 10"],["12 ÷ 3 = ?",["3","4","5","6"],"4","12 ÷ 3 = 4"],["125 + 36 = ?",["151","161","171","181"],"161","125 + 36 = 161"],["9 × 8 = ?",["63","72","81","64"],"72","9 × 8 = 72"],["√144 = ?",["10","11","12","14"],"12","12 × 12 = 144"],["200 का 15%?",["15","20","30","35"],"30","200 का 15% = 30"],["2x + 6 = 16, x = ?",["4","5","6","8"],"5","2x = 10, इसलिए x = 5"]],
+science:[
+["पौधे को क्या चाहिए?",["धूप और पानी","प्लास्टिक","धुआँ","काँच"],"धूप और पानी","पौधों को धूप और पानी चाहिए"],["हम किससे देखते हैं?",["कान","आँखें","नाक","हाथ"],"आँखें","हम आँखों से देखते हैं"],["सूरज क्या है?",["तारा","ग्रह","चाँद","बादल"],"तारा","सूरज एक तारा है"],["पानी जमकर क्या बनता है?",["बर्फ","भाप","रेत","धुआँ"],"बर्फ","पानी जमकर बर्फ बनता है"],["लाल ग्रह कौन है?",["पृथ्वी","मंगल","शुक्र","बुध"],"मंगल","मंगल लाल ग्रह है"],["साँस लेने में किस गैस की जरूरत है?",["ऑक्सीजन","हीलियम","धुआँ","हाइड्रोजन"],"ऑक्सीजन","हम ऑक्सीजन लेते हैं"],["बल की SI इकाई?",["जूल","न्यूटन","वाट","मीटर"],"न्यूटन","बल की इकाई न्यूटन है"],["ऊर्जा की SI इकाई?",["न्यूटन","जूल","वाट","पास्कल"],"जूल","ऊर्जा की इकाई जूल है"],["ध्वनि कहाँ यात्रा नहीं कर सकती?",["पानी","हवा","इस्पात","निर्वात"],"निर्वात","ध्वनि को माध्यम चाहिए"]],
+english:[
+["Cat का मतलब?",["बिल्ली","कुत्ता","गाय","घोड़ा"],"बिल्ली","Cat means बिल्ली"],["Apple का मतलब?",["सेब","किताब","पानी","कुर्सी"],"सेब","Apple means सेब"],["Opposite of hot?",["Cold","Tall","Fast","Big"],"Cold","Hot का opposite Cold है"],["Plural of child?",["Childs","Children","Childes","Childrens"],"Children","Children सही plural है"],["Past tense of go?",["Goed","Gone","Went","Going"],"Went","Go का past tense went है"],["Choose the verb: Birds fly.",["Birds","fly","the","none"],"fly","Fly action word है"],["Synonym of happy?",["Joyful","Angry","Tired","Tiny"],"Joyful","Joyful का अर्थ happy जैसा है"],["She ___ to school.",["go","goes","going","gone"],"goes","She goes to school"],["Antonym of ancient?",["Old","Modern","Historic","Past"],"Modern","Modern, ancient का opposite है"]],
+hindi:[
+["कमल क्या है?",["फूल","जानवर","रंग","खेल"],"फूल","कमल एक फूल है"],["दिन का विलोम?",["सुबह","रात","धूप","समय"],"रात","दिन का विलोम रात है"],["इनमें फल कौन है?",["आम","कुर्सी","कलम","जूता"],"आम","आम एक फल है"],["जल का समानार्थी?",["पानी","आग","हवा","धरती"],"पानी","जल का समानार्थी पानी है"],["सुंदर का विलोम?",["अच्छा","कुरूप","प्यारा","साफ"],"कुरूप","सुंदर का विलोम कुरूप है"],["संज्ञा कौन-सी है?",["दौड़ना","मीठा","दिल्ली","जल्दी"],"दिल्ली","दिल्ली एक स्थान का नाम है"],["उन्नति का विलोम?",["प्रगति","अवनति","विकास","उत्थान"],"अवनति","उन्नति का विलोम अवनति है"],["जो कभी न मरे?",["अमर","अटल","अजेय","अनंत"],"अमर","अमर का अर्थ जो न मरे"],["राम ने फल खाया। कौन-सा काल?",["वर्तमान","भूतकाल","भविष्य","कोई नहीं"],"भूतकाल","खाया भूतकाल का संकेत है"]],
+grammar:[
+["संज्ञा किसका नाम है?",["व्यक्ति/स्थान/वस्तु","केवल काम","केवल रंग","केवल संख्या"],"व्यक्ति/स्थान/वस्तु","संज्ञा नाम बताती है"],["मैं कौन-सा शब्द है?",["सर्वनाम","संज्ञा","क्रिया","विशेषण"],"सर्वनाम","मैं सर्वनाम है"],["दौड़ना क्या है?",["क्रिया","रंग","संज्ञा","वचन"],"क्रिया","दौड़ना एक क्रिया है"],["लाल फूल में विशेषण?",["लाल","फूल","में","कोई नहीं"],"लाल","लाल विशेषता बताता है"],["लड़का का बहुवचन?",["लड़के","लड़की","लड़कों ने","लड़का ही"],"लड़के","लड़का का बहुवचन लड़के है"],["प्रश्न पूछने का चिह्न?",["?","।",",","!"],"?","? प्रश्नवाचक चिह्न है"],["ईमानदारी कौन-सी संज्ञा है?",["भाववाचक","व्यक्तिवाचक","जातिवाचक","समूहवाचक"],"भाववाचक","ईमानदारी एक भाव है"],["जो पढ़ने योग्य हो?",["पठनीय","पाठक","पाठशाला","पठित"],"पठनीय","पठनीय का अर्थ पढ़ने योग्य है"],["राम द्वारा पत्र लिखा गया। कौन-सा वाच्य?",["कर्तृवाच्य","कर्मवाच्य","भाववाच्य","कोई नहीं"],"कर्मवाच्य","यह कर्मवाच्य है"]]};
+function save(){try{localStorage.setItem("FUNPLAY3D_SAVE",JSON.stringify(data));}catch(e){}}
+const HISTORY_KEY="FUNPLAY3D_ADMIN_HISTORY";
+function getHistory(){try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]");}catch(e){return [];}}
+function recordSession(entry){try{let h=getHistory();h.unshift({...entry,id:Date.now()+"-"+Math.random().toString(36).slice(2,7),date:new Date().toLocaleString(),player:data.playerName||"Guest Player",age:data.age,level:data.level,coinsTotal:data.coins,xpTotal:data.xp});if(h.length>2000)h=h.slice(0,2000);localStorage.setItem(HISTORY_KEY,JSON.stringify(h));}catch(e){}}
+function openAdmin(){const pin=prompt("Admin PIN डालें / Enter Admin PIN (demo PIN: 2468)");if(pin!=="2468"){if(pin!==null)alert("गलत PIN / Incorrect PIN");return;}showOnly("adminPanel");renderAdminTable();}
+function renderAdminTable(){const h=getHistory(),q=(document.getElementById("adminSearch")?.value||"").toLowerCase(),filtered=h.filter(r=>(r.player||"").toLowerCase().includes(q)||(r.game||"").toLowerCase().includes(q));const players=new Set(h.map(r=>r.player||"Guest Player"));$("adminPlayers").textContent=players.size;$ ("adminSessions").textContent=h.length;$ ("adminCorrect").textContent=h.reduce((n,r)=>n+(Number(r.correct)||0),0);$("adminCoins").textContent=h.reduce((n,r)=>n+(Number(r.coinsEarned)||0),0);$("adminRows").innerHTML=filtered.map(r=>`<tr><td style="padding:8px;border-top:1px solid #ffffff33">${escapeHTML(r.date||"")}</td><td style="padding:8px;border-top:1px solid #ffffff33">${escapeHTML(r.player||"")}</td><td style="padding:8px;border-top:1px solid #ffffff33">${r.age??""}</td><td style="padding:8px;border-top:1px solid #ffffff33">${escapeHTML(r.game||"")}</td><td style="padding:8px;border-top:1px solid #ffffff33">${r.score??""}</td><td style="padding:8px;border-top:1px solid #ffffff33">${r.coinsEarned??0}</td><td style="padding:8px;border-top:1px solid #ffffff33">${r.xpEarned??0}</td><td style="padding:8px;border-top:1px solid #ffffff33"><button class="secondary" onclick="showSessionDetail('${r.id}')">View</button></td></tr>`).join("")||'<tr><td colspan="8" style="padding:12px">अभी कोई रिकॉर्ड नहीं। एक गेम पूरा करने के बाद रिकॉर्ड दिखेगा।</td></tr>';}
+function escapeHTML(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function showSessionDetail(id){const r=getHistory().find(x=>x.id===id);if(r)alert(JSON.stringify(r,null,2));}
+function exportAdminCSV(){const h=getHistory();if(!h.length){alert("Export करने के लिए रिकॉर्ड नहीं हैं।");return;}const cols=["date","player","age","game","score","correct","total","coinsEarned","xpEarned","level","coinsTotal","xpTotal","details"];const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"';const csv=[cols.join(","),...h.map(r=>cols.map(k=>q(typeof r[k]==="object"?JSON.stringify(r[k]):r[k])).join(","))].join("\r\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8;"}));a.download="fun-play-admin-report.csv";a.click();URL.revokeObjectURL(a.href);}
+function openLogin(){$("playerName").value=data.playerName||"";$('profileAge').value=String(data.age);$('phoneArea').classList.add('hidden');showOnly('loginPanel');}
+function guestLogin(){data.playerName=$('playerName').value.trim()||'Player';data.age=Math.max(6,Math.min(15,Number($('profileAge').value)||8));data.loggedIn=true;renderAges();updateStats();changeLanguage();save();showOnly('home');}
+function googleLogin(){alert('Google login needs your own Firebase project and Web App configuration. No Google account is connected in this demo.');}
+function showPhoneLogin(){$('phoneArea').classList.remove('hidden');$('otpNote').textContent='';}
+function requestOtp(){const p=$('phoneNumber').value.trim();if(!/^\+?[0-9 ()-]{10,16}$/.test(p)){alert('कृपया सही मोबाइल नंबर लिखें। / Enter a valid phone number.');return;} $('otpNote').textContent='OTP भेजने की सुविधा अभी demo में बंद है। Firebase Phone Authentication configure करने के बाद असली OTP भेजा जाएगा।';}
+function verifyOtp(){alert('Real OTP verification is not active until Firebase Phone Authentication is configured.');}
+function updateDashboard(){$('dashName').textContent=data.playerName||'Guest Player';$('dashAge').textContent=(data.lang==='en'?'Age ':'उम्र ')+data.age;$('dashCoins').textContent=data.coins;$('dashXP').textContent=data.xp;$('dashLevel').textContent=data.level;$('dashCorrect').textContent=data.totalCorrect||0;$('accountBtn').textContent=data.loggedIn?'👤 '+(data.playerName||'Player'):'👤 Login';}
+function className(){return data.age<=6?"Class 1":data.age===7?"Class 2":data.age===8?"Class 3":data.age===9?"Class 4":data.age===10?"Class 5":data.age===11?"Class 6":data.age===12?"Class 7":data.age===13?"Class 8":data.age===14?"Class 9":"Class 10";}
+function difficulty(){return data.age<=7?"Easy":data.age<=9?"Basic":data.age<=11?"Medium":data.age<=13?"Advanced":data.age===14?"Hard":"Expert";}
+function renderAges(){$("ages").innerHTML="";for(let a=6;a<=15;a++){let b=document.createElement("button");b.className="age "+(a===data.age?"active":"secondary");b.textContent=a;b.onclick=()=>{data.age=a;renderAges();save();};$("ages").appendChild(b);} $("ageInfo").textContent="उम्र "+data.age+" साल • "+className()+" • "+difficulty();}
+function renderSubjects(){$("subjects").innerHTML=subjects.map(s=>`<div class="card"><div class="emoji">${s.emoji}</div><h3>${data.lang==="hi"?s.hi:s.en}</h3><p>${s.desc}</p><p class="small">Age ${data.age} • ${difficulty()}</p><button class="btn" onclick="startQuiz('${s.id}')">खेलें / Play</button></div>`).join("");}
+function updateStats(){updateDashboard();$("coins").textContent=data.coins;$("xp").textContent=data.xp;$("level").textContent=data.level;$("progressText").textContent=data.xp+" / 100 XP • Level "+data.level;$("bar").style.width=data.xp+"%";$("unlockText").textContent=data.level>20?"🎉 3D Fun Game अनलॉक! बचे हुए रन: "+data.bonusPlays+"/3":"3D Fun Game Level 21 पर खुलेगा। अभी Level "+data.level+" है।";$("runnerStatus").textContent=data.level>20?"3D गेम अनलॉक है! बचे हुए रन: "+data.bonusPlays+"/3":"Level 20 पार करें। अभी Level "+data.level+" है।";save();}
+function showOnly(id){["home","quiz","result","runner","loginPanel","adminPanel"].forEach(x=>$(x).classList.toggle("hidden",x!==id));window.scrollTo({top:0,behavior:"smooth"});}
+function goHome(){showOnly("home");}
+function startQuiz(id){data.subject=id;data.index=0;data.answers={};data.correct=0;data.roundCoins=0;data.roundXP=0;let all=bank[id];let start=data.age<=8?0:data.age<=11?2:data.age<=13?4:6;data.questions=all.slice(start,Math.min(start+3,all.length)).map(q=>[q[0],[...q[1]],q[2],q[3]]);if(data.age>=12)data.questions.push(...all.slice(0,2).map(q=>[q[0],[...q[1]],q[2],q[3]]));for(let i=data.questions.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[data.questions[i],data.questions[j]]=[data.questions[j],data.questions[i]];}showOnly("quiz");$("quizTitle").textContent=(subjects.find(s=>s.id===id).emoji)+" "+(data.lang==="hi"?subjects.find(s=>s.id===id).hi:subjects.find(s=>s.id===id).en);renderQuestion();}
+const bilingual={
+"पौधे को क्या चाहिए?":"What do plants need?","धूप और पानी":"Sunlight and water","प्लास्टिक":"Plastic","धुआँ":"Smoke","काँच":"Glass","हम किससे देखते हैं?":"What do we use to see?","कान":"Ears","आँखें":"Eyes","नाक":"Nose","हाथ":"Hands","सूरज क्या है?":"What is the Sun?","तारा":"Star","ग्रह":"Planet","चाँद":"Moon","बादल":"Cloud","पानी जमकर क्या बनता है?":"What does water become when it freezes?","बर्फ":"Ice","भाप":"Steam","रेत":"Sand","लाल ग्रह कौन है?":"Which is the red planet?","पृथ्वी":"Earth","मंगल":"Mars","शुक्र":"Venus","बुध":"Mercury","साँस लेने में किस गैस की जरूरत है?":"Which gas do we need to breathe?","ऑक्सीजन":"Oxygen","बल की SI इकाई?":"SI unit of force?","न्यूटन":"Newton","ऊर्जा की SI इकाई?":"SI unit of energy?","जूल":"Joule","ध्वनि कहाँ यात्रा नहीं कर सकती?":"Where can sound not travel?","निर्वात":"Vacuum","कमल क्या है?":"What is a lotus?","फूल":"Flower","दिन का विलोम?":"Opposite of day?","रात":"Night","इनमें फल कौन है?":"Which of these is a fruit?","आम":"Mango","जल का समानार्थी?":"Synonym of water?","पानी":"Water","सुंदर का विलोम?":"Opposite of beautiful?","कुरूप":"Ugly","संज्ञा किसका नाम है?":"What does a noun name?","व्यक्ति/स्थान/वस्तु":"Person/place/thing","मैं कौन-सा शब्द है?":"Which type of word is ‘I’?","सर्वनाम":"Pronoun","दौड़ना क्या है?":"What is running?","क्रिया":"Verb","लाल फूल में विशेषण?":"What is the adjective in ‘red flower’?","लाल":"Red","लड़का का बहुवचन?":"Plural of boy?","लड़के":"Boys","प्रश्न पूछने का चिह्न?":"Punctuation mark for a question?","ईमानदारी कौन-सी संज्ञा है?":"What type of noun is honesty?","भाववाचक":"Abstract noun","जो पढ़ने योग्य हो?":"Something that is readable?","पठनीय":"Readable","राम द्वारा पत्र लिखा गया। कौन-सा वाच्य?":"‘The letter was written by Ram.’ Which voice?","कर्मवाच्य":"Passive voice","Cat का मतलब?":"What does ‘Cat’ mean?","बिल्ली":"Cat","कुत्ता":"Dog","गाय":"Cow","घोड़ा":"Horse","Apple का मतलब?":"What does ‘Apple’ mean?","सेब":"Apple","Opposite of hot?":"Opposite of hot?","Plural of child?":"Plural of child?","Past tense of go?":"Past tense of go?","Choose the verb: Birds fly.":"Choose the verb: Birds fly.","Synonym of happy?":"Synonym of happy?","She ___ to school.":"She ___ to school.","Antonym of ancient?":"Antonym of ancient?","3 + 4 = 7":"3 + 4 = 7","पौधों को धूप और पानी चाहिए":"Plants need sunlight and water","हम आँखों से देखते हैं":"We see with our eyes","सूरज एक तारा है":"The Sun is a star","पानी जमकर बर्फ बनता है":"Water freezes into ice","मंगल लाल ग्रह है":"Mars is the red planet","हम ऑक्सीजन लेते हैं":"We breathe in oxygen","बल की इकाई न्यूटन है":"Newton is the unit of force","ऊर्जा की इकाई जूल है":"Joule is the unit of energy"
+};
+function tr(t){return bilingual[t]||t;}
+function shown(t){if(data.lang==='en')return tr(t);if(data.lang==='bi'){let en=tr(t);return en===t?t:(t+' / '+en);}return t;}
+Object.assign(bilingual,{
+"125 + 36 = ?":"125 + 36 = ?","200 का 15%?":"15% of 200?","2x + 6 = 16, x = ?":"2x + 6 = 16, x = ?","कमल क्या है?":"What is a lotus?","दिन का विलोम?":"What is the opposite of day?","इनमें फल कौन है?":"Which one is a fruit?","जल का समानार्थी?":"What is a synonym of water?","सुंदर का विलोम?":"What is the opposite of beautiful?","संज्ञा कौन-सी है?":"Which one is a noun?","उन्नति का विलोम?":"What is the opposite of progress?","जो कभी न मरे?":"One who never dies?","राम ने फल खाया। कौन-सा काल?":"Ram ate a fruit. Which tense?","संज्ञा किसका नाम है?":"What does a noun name?","मैं कौन-सा शब्द है?":"What kind of word is ‘I’?","लाल फूल में विशेषण?":"Which is the adjective in ‘red flower’?","लड़का का बहुवचन?":"What is the plural of boy?","प्रश्न पूछने का चिह्न?":"Which mark is used to ask a question?","ईमानदारी कौन-सी संज्ञा है?":"What type of noun is honesty?","जो पढ़ने योग्य हो?":"What does ‘readable’ mean?","राम द्वारा पत्र लिखा गया। कौन-सा वाच्य?":"‘The letter was written by Ram.’ Which voice?","प्लास्टिक":"Plastic","काँच":"Glass","सुबह":"Morning","धूप":"Sunlight","आग":"Fire","हवा":"Air","धरती":"Earth","अच्छा":"Good","प्यारा":"Lovely","साफ":"Clean","प्रगति":"Progress","विकास":"Development","उत्थान":"Rise","अमर":"Immortal","अटल":"Steadfast","अजेय":"Invincible","अनंत":"Infinite","व्यक्ति/स्थान/वस्तु":"Person/place/thing","केवल काम":"Only an action","केवल रंग":"Only a colour","केवल संख्या":"Only a number","मीठा":"Sweet","दिल्ली":"Delhi","जल्दी":"Quickly","विशेषण":"Adjective","व्यक्तिवाचक":"Proper noun","जातिवाचक":"Common noun","समूहवाचक":"Collective noun","कर्तृवाच्य":"Active voice","भाववाच्य":"Impersonal voice","कोई नहीं":"None","लड़की":"Girl","लड़कों ने":"Boys did","लड़का ही":"Boy only","नहीं":"No","पाठक":"Reader","पाठशाला":"School","पठित":"Read","पानी":"Water","बिल्ली":"Cat","कुत्ता":"Dog","कुर्सी":"Chair","किताब":"Book","पानी":"Water","घोड़ा":"Horse","न्यूटन":"Newton","मीटर":"Meter","वाट":"Watt","पास्कल":"Pascal","जूल":"Joule","हीलियम":"Helium","हाइड्रोजन":"Hydrogen","इस्पात":"Steel","हवा":"Air"
+});
+function renderQuestion(){let q=data.questions[data.index];$("finishBtn").classList.add("hidden");$("question").textContent=shown(q[0]);$("questionInfo").textContent=(data.lang==='en'?"Age ":"उम्र ")+data.age+" • "+className()+" • "+(data.lang==='en'?"Question ":"सवाल ")+(data.index+1)+" / "+data.questions.length;$("answers").innerHTML="";$("feedback").textContent="";q[1].forEach(opt=>{let b=document.createElement("button");b.className="secondary";b.textContent=shown(opt);b.dataset.answer=opt;b.onclick=()=>answerQuestion(opt,b);$("answers").appendChild(b);});let saved=data.answers[data.index];if(saved){$("feedback").textContent=saved.correct?"✅ "+q[3]:"सही जवाब: "+q[2];[...$("answers").children].forEach(b=>{b.disabled=true;if(b.dataset.answer===q[2]){b.style.background="#3de0a1";b.style.color="#123b3a";}else if(b.dataset.answer===saved.choice){b.style.background="#ff6c9b";b.style.color="#381035";}});if(Object.keys(data.answers).length===data.questions.length)$("finishBtn").classList.remove("hidden");}}
+function answerQuestion(opt,button){if(data.answers[data.index])return;let q=data.questions[data.index],correct=opt===q[2];data.answers[data.index]={choice:opt,correct};[...$("answers").children].forEach(b=>{b.disabled=true;if(b.dataset.answer===q[2]){b.style.background="#3de0a1";b.style.color="#123b3a";}});if(correct){data.correct++;data.totalCorrect=(data.totalCorrect||0)+1;data.coins+=10;data.roundCoins+=10;data.xp+=10;data.roundXP+=10;if(data.xp>=100){data.xp-=100;data.level=Math.min(9999,data.level+1);$("feedback").textContent="🎉 "+q[3]+" • LEVEL UP!";}else $("feedback").textContent="🎉 "+q[3]+" • +10 coins";}else{$("feedback").textContent="कोई बात नहीं! सही जवाब: "+q[2];button.style.background="#ff6c9b";}if(Object.keys(data.answers).length===data.questions.length)$("finishBtn").classList.remove("hidden");updateStats();}
+function nextQuestion(){if(data.index<data.questions.length-1){data.index++;renderQuestion();}else if(Object.keys(data.answers).length===data.questions.length){$("finishBtn").classList.remove("hidden");$("feedback").textContent="सभी सवाल पूरे! अब Finish दबाएँ।";}else $("feedback").textContent="पहले इस सवाल का जवाब दें।";}
+function previousQuestion(){if(data.index>0){data.index--;renderQuestion();}else $("feedback").textContent="यह पहला सवाल है।";}
+function finishQuiz(){if(Object.keys(data.answers).length!==data.questions.length){$("feedback").textContent="पहले सभी सवालों के जवाब दें।";return;}recordSession({game:"Quiz - "+(subjects.find(s=>s.id===data.subject)?.en||data.subject),score:data.correct+"/"+data.questions.length,correct:data.correct,total:data.questions.length,coinsEarned:data.roundCoins,xpEarned:data.roundXP,details:data.questions.map((q,i)=>({question:q[0],chosen:data.answers[i]?.choice??"Not answered",correctAnswer:q[2],isCorrect:!!data.answers[i]?.correct}))});showOnly("result");$("resultText").textContent="आपने "+data.questions.length+" में से "+data.correct+" सही जवाब दिए।";$("earnedCoins").textContent=data.roundCoins;$("earnedXP").textContent=data.roundXP;updateStats();}
+function playAgain(){startQuiz(data.subject);}
+function changeLanguage(){data.lang=$("language").value;$("welcome").textContent=data.lang==="hi"?"खेलो भी, सीखो भी! 🚀":"Play • Learn • Win! 🚀";$("intro").textContent=data.lang==="hi"?"अपनी उम्र चुनें और पढ़ाई को मजेदार बनाएं।":"Choose your age and make learning fun.";renderSubjects();if(!$("quiz").classList.contains("hidden") && data.questions.length)renderQuestion();updateDashboard();save();}
+function openRunner(){if(data.level<=20){alert("3D Fun Game खेलने के लिए Level 20 पार करें! सही जवाब देकर XP कमाएँ।");return;}if(data.bonusPlays<=0){alert("आपके 3 बोनस रन पूरे हो चुके हैं। पढ़ाई वाले गेम हमेशा खेल सकते हैं!");return;}showOnly("runner");drawScene();}
+const canvas=$("gameCanvas"),ctx=canvas.getContext("2d");let running=false,raf=0,lane=1,runScore=0,runCoins=0,runLives=3,objects=[],frame=0,lastTime=0,swipeX=null;
+function drawScene(){let w=canvas.width,h=canvas.height;let g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,"#4cc9f0");g.addColorStop(.48,"#9be7ff");g.addColorStop(.49,"#1c8751");g.addColorStop(1,"#063b2c");ctx.fillStyle=g;ctx.fillRect(0,0,w,h);ctx.fillStyle="#4b4b63";ctx.beginPath();ctx.moveTo(w*.36,h*.42);ctx.lineTo(w*.64,h*.42);ctx.lineTo(w*.98,h);ctx.lineTo(w*.02,h);ctx.closePath();ctx.fill();ctx.strokeStyle="#fff6a0";ctx.lineWidth=3;for(let i=0;i<2;i++){let topX=w*(.42+i*.16),bottomX=w*(.34+i*.32);ctx.beginPath();ctx.moveTo(topX,h*.42);ctx.lineTo(bottomX,h);ctx.stroke();}for(let i=0;i<9;i++){let y=h*.45+i*i*4+((frame*5)%38);if(y>h)continue;let x=w*.5;ctx.strokeStyle="#ffffffaa";ctx.lineWidth=2+i*.5;ctx.beginPath();ctx.moveTo(x-3-i,y);ctx.lineTo(x+3+i,y);ctx.stroke();}objects.forEach(o=>{let p=o.z;let y=h*.42+p*h*.65;let spread=(p*w*.32);let x=w*.5+(o.lane-1)*spread;let size=12+p*35;if(o.type==="coin"){ctx.fillStyle="#ffd83d";ctx.beginPath();ctx.ellipse(x,y,size*.55,size*.75,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#fff4a6";ctx.lineWidth=3;ctx.stroke();}else{ctx.fillStyle=o.type==="block"?"#ff4f76":"#7d5cff";ctx.fillRect(x-size/2,y-size,size,size);ctx.fillStyle="#fff";ctx.fillRect(x-size*.25,y-size*.7,size*.15,size*.15);ctx.fillRect(x+size*.1,y-size*.7,size*.15,size*.15);}});let px=w*.5+(lane-1)*w*.16,py=h*.82;ctx.fillStyle="#ffe34d";ctx.beginPath();ctx.arc(px,py-35,18,0,Math.PI*2);ctx.fill();ctx.fillStyle="#e84a5f";ctx.fillRect(px-17,py-18,34,42);ctx.fillStyle="#172554";ctx.fillRect(px-16,py+22,12,22);ctx.fillRect(px+4,py+22,12,22);ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(px-6,py-38,3,0,Math.PI*2);ctx.arc(px+6,py-38,3,0,Math.PI*2);ctx.fill();if(!running){ctx.fillStyle="#07172ccc";ctx.fillRect(80,175,w-160,110);ctx.fillStyle="#fff";ctx.textAlign="center";ctx.font="bold 30px Arial";ctx.fillText(data.bonusPlays<=0?"RUNS FINISHED":"3D COIN RUNNER",w/2,220);ctx.font="18px Arial";ctx.fillText(data.bonusPlays<=0?"आपके तीनों मौके पूरे हो गए":"START दबाकर दौड़ शुरू करें",w/2,255);}}
+function startRunner(){if(data.level<=20||data.bonusPlays<=0||running)return;data.bonusPlays--;save();running=true;lane=1;runScore=0;runCoins=0;runLives=3;objects=[];frame=0;lastTime=0;$("runMessage").textContent="दौड़ो, कॉइन लो और बाधाओं से बचो!";$("startRunBtn").disabled=true;$("runTime").textContent="🏃 GO!";$("runScore").textContent="🪙 0";$("runLives").textContent="❤️❤️❤️";updateStats();raf=requestAnimationFrame(gameLoop);}
+function moveRunner(d){if(!running)return;lane=Math.max(0,Math.min(2,lane+d));}
+function gameLoop(t){if(!running)return;let dt=Math.min(32,t-(lastTime||t));lastTime=t;frame+=dt/16;runScore+=dt*.015;if(Math.random()<.035)objects.push({lane:Math.floor(Math.random()*3),z:0,type:Math.random()<.62?"coin":Math.random()<.5?"block":"cone"});objects.forEach(o=>o.z+=dt/420);objects=objects.filter(o=>{if(o.z>.83&&!o.hit){o.hit=true;if(o.lane===lane){if(o.type==="coin"){runCoins++;data.coins++;}else{runLives--;}}}return o.z<1.1;});$("runScore").textContent="🪙 "+runCoins+" | Score "+Math.floor(runScore);$("runLives").textContent="❤️".repeat(Math.max(0,runLives))+"🖤".repeat(3-Math.max(0,runLives));drawScene();if(runLives<=0||frame>950){endRunner();return;}raf=requestAnimationFrame(gameLoop);}
+function endRunner(){running=false;cancelAnimationFrame(raf);$("startRunBtn").disabled=false;recordSession({game:"3D Coin Runner",score:Math.floor(runScore),correct:0,total:0,coinsEarned:runCoins,xpEarned:0,details:{runScore:Math.floor(runScore),coinsCollected:runCoins,livesRemaining:runLives,bonusRunsLeft:data.bonusPlays}});data.runnerCoins+=runCoins;data.xp=Math.min(99,data.xp);save();updateStats();drawScene();$("runTime").textContent="🏁 FINISH";$("runMessage").textContent="रन पूरा! आपने "+runCoins+" कॉइन लिए। इस बोनस रन का मौका इस्तेमाल हो गया। बचे: "+data.bonusPlays+"/3";if(data.bonusPlays===0)$("runnerStatus").textContent="तीनों बोनस रन पूरे हो गए।";else $("runnerStatus").textContent="बचे हुए रन: "+data.bonusPlays+"/3";}
+canvas.addEventListener("pointerdown",e=>{swipeX=e.clientX;});canvas.addEventListener("pointerup",e=>{if(swipeX===null)return;let dx=e.clientX-swipeX;if(Math.abs(dx)>25)moveRunner(dx>0?1:-1);swipeX=null;});
+renderAges();renderSubjects();$("language").value=data.lang;changeLanguage();updateStats();drawScene();
+</script>
+
+<!-- FIREBASE INTEGRATION: Replace the placeholder values below with the firebaseConfig shown in Firebase Console > Project settings > Your apps. -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, RecaptchaVerifier, signInWithPhoneNumber, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+import { getFirestore, doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+
+// Paste your own exact Firebase Web App config here. These are intentionally placeholders.
+const firebaseConfig = {
+  apiKey: "AIzaSyBDnZWOuNsdxrC0TKYehk2oSreuyhpkNm4",
+  authDomain: "fun-play-3d.firebaseapp.com",
+  projectId: "fun-play-3d",
+  storageBucket: "fun-play-3d.firebasestorage.app",
+  messagingSenderId: "109107617374",
+  appId: "1:109107617374:web:2ac233667d4ca787e3decf",
+  measurementId: "G-EGR5W67NRN"
+};
+const firebaseReady = Object.values(firebaseConfig).every(v => v && !String(v).includes('PASTE_'));
+let fbApp=null, auth=null, db=null, confirmationResult=null, recaptcha=null, cloudHistory=[];
+const byId=id=>document.getElementById(id);
+function firebaseNotice(msg){alert(msg);}
+function currentUid(){return auth?.currentUser?.uid || null;}
+function isRealConfig(){return firebaseReady;}
+if(firebaseReady){
+  try {
+    fbApp=initializeApp(firebaseConfig); auth=getAuth(fbApp); db=getFirestore(fbApp);
+    window.FUNPLAY_FIREBASE_STATUS='connected';
+  } catch(e){ console.error(e); window.FUNPLAY_FIREBASE_STATUS='error'; }
+} else {
+  window.FUNPLAY_FIREBASE_STATUS='config-needed';
+  console.warn('FUN PLAY 3D: paste your Firebase Web App config into firebaseConfig to activate online login/data.');
+}
+async function saveCloudPlayer(){
+  if(!auth?.currentUser || !db) return;
+  const u=auth.currentUser;
+  const profile={uid:u.uid, name:(byId('playerName')?.value||data.playerName||u.displayName||'Player').trim().slice(0,50), age:Number(byId('profileAge')?.value||data.age||8), email:u.email||null, phoneNumber:u.phoneNumber||null, photoURL:u.photoURL||null, coins:Number(data.coins)||0, xp:Number(data.xp)||0, level:Number(data.level)||1, totalCorrect:Number(data.totalCorrect)||0, bonusPlays:Number(data.bonusPlays)||0, updatedAt:serverTimestamp()};
+  await setDoc(doc(db,'players',u.uid),profile,{merge:true});
+  data.playerName=profile.name; data.age=Math.max(6,Math.min(15,profile.age)); data.loggedIn=true; data.uid=u.uid;
+  try{localStorage.setItem('FUNPLAY3D_SAVE',JSON.stringify(data));}catch(e){}
+  if(byId('accountBtn'))byId('accountBtn').textContent='👤 '+(data.playerName||'Player');
+  if(byId('loginHint'))byId('loginHint').textContent='Signed in • UID: '+u.uid;
+}
+const oldSave=window.save;
+window.save=function(){ if(oldSave)oldSave(); if(auth?.currentUser && db) saveCloudPlayer().catch(e=>console.error('Player save failed',e)); };
+const oldGuestLogin=window.guestLogin;
+window.guestLogin=function(){
+  if(!auth?.currentUser){firebaseNotice('असली UID और ऑनलाइन रिकॉर्ड के लिए Google या Phone OTP से लॉगिन करें। Guest mode केवल इस डिवाइस पर सेव होता है।'); if(oldGuestLogin)oldGuestLogin(); return;}
+  if(oldGuestLogin)oldGuestLogin(); saveCloudPlayer().catch(e=>firebaseNotice('Profile save error: '+e.message));
+};
+window.googleLogin=async function(){
+  if(!isRealConfig()||!auth){firebaseNotice('पहले HTML के firebaseConfig में Firebase Console वाला अपना Web App config पेस्ट करें।');return;}
+  try{const provider=new GoogleAuthProvider(); const result=await signInWithPopup(auth,provider); data.playerName=result.user.displayName||byId('playerName').value||'Player'; data.loggedIn=true; if(result.user.uid)data.uid=result.user.uid; await saveCloudPlayer(); renderAges();updateStats();showOnly('home');}
+  catch(e){firebaseNotice('Google login नहीं हो पाया: '+e.message+'\nFirebase Authentication में Google provider और authorized domain चेक करें।');}
+};
+window.showPhoneLogin=function(){byId('phoneArea').classList.remove('hidden');byId('otpNote').textContent='Country code के साथ नंबर लिखें, जैसे +91XXXXXXXXXX.';};
+window.requestOtp=async function(){
+  if(!isRealConfig()||!auth){firebaseNotice('पहले HTML के firebaseConfig में Firebase Console वाला config पेस्ट करें।');return;}
+  const phone=byId('phoneNumber').value.trim(); if(!/^\+[1-9]\d{7,14}$/.test(phone)){firebaseNotice('नंबर country code के साथ लिखें, जैसे +91XXXXXXXXXX.');return;}
+  try{if(recaptcha){try{recaptcha.clear();}catch(e){}} recaptcha=new RecaptchaVerifier(auth,'recaptcha-container',{size:'normal'}); confirmationResult=await signInWithPhoneNumber(auth,phone,recaptcha);byId('otpNote').textContent='OTP भेज दिया गया है। SMS में आया कोड डालें।';}
+  catch(e){console.error(e);byId('otpNote').textContent='OTP नहीं भेजा गया: '+e.message+' • Phone provider, SMS limits और authorized domain जाँचें।';}
+};
+window.verifyOtp=async function(){
+  if(!confirmationResult){firebaseNotice('पहले Send OTP दबाएँ।');return;}
+  const code=byId('otpCode').value.trim(); if(!/^\d{6}$/.test(code)){firebaseNotice('SMS वाला 6 अंकों का OTP डालें।');return;}
+  try{const result=await confirmationResult.confirm(code);data.playerName=byId('playerName').value.trim()||result.user.displayName||'Player';data.loggedIn=true;data.uid=result.user.uid;await saveCloudPlayer();renderAges();updateStats();showOnly('home');}
+  catch(e){firebaseNotice('OTP verify नहीं हुआ: '+e.message);}
+};
+const oldRecordSession=window.recordSession;
+window.recordSession=function(entry){
+  if(oldRecordSession)oldRecordSession(entry);
+  if(auth?.currentUser && db){const u=auth.currentUser;const record={...entry,uid:u.uid,player:data.playerName||u.displayName||'Player',age:Number(data.age),level:Number(data.level),coinsTotal:Number(data.coins),xpTotal:Number(data.xp),createdAt:serverTimestamp(),clientDate:new Date().toISOString()};
+    addDoc(collection(db,'gameSessions'),record).then(()=>saveCloudPlayer()).catch(e=>console.error('Session upload failed',e));
+  }
+};
+window.openAdmin=async function(){
+  if(!auth?.currentUser){firebaseNotice('Admin reports देखने के लिए अपने authorized admin Google/Phone account से लॉगिन करें।');return;}
+  try{const token=await auth.currentUser.getIdTokenResult(true);if(token.claims.admin!==true){firebaseNotice('यह account admin नहीं है। सुरक्षित admin access के लिए server-side Firebase custom claim admin=true सेट करना होगा।');return;}
+    const [ps,ss]=await Promise.all([getDocs(query(collection(db,'players'),limit(1000))),getDocs(query(collection(db,'gameSessions'),orderBy('createdAt','desc'),limit(1000)))]);
+    const players=ps.docs.map(d=>({uid:d.id,...d.data()}));cloudHistory=ss.docs.map(d=>({id:d.id,...d.data(),date:d.data().clientDate||''}));
+    byId('adminPlayers').textContent=players.length;byId('adminSessions').textContent=cloudHistory.length;byId('adminCorrect').textContent=cloudHistory.reduce((n,r)=>n+(Number(r.correct)||0),0);byId('adminCoins').textContent=cloudHistory.reduce((n,r)=>n+(Number(r.coinsEarned)||0),0);
+    byId('adminRows').innerHTML=cloudHistory.map(r=>`<tr><td style="padding:8px;border-top:1px solid #ffffff33">${String(r.date||'').replace(/[<>]/g,'')}</td><td style="padding:8px;border-top:1px solid #ffffff33">${String(r.player||'').replace(/[<>]/g,'')}</td><td style="padding:8px;border-top:1px solid #ffffff33">${r.age??''}</td><td style="padding:8px;border-top:1px solid #ffffff33">${String(r.game||'').replace(/[<>]/g,'')}</td><td style="padding:8px;border-top:1px solid #ffffff33">${r.score??''}</td><td style="padding:8px;border-top:1px solid #ffffff33">${r.coinsEarned??0}</td><td style="padding:8px;border-top:1px solid #ffffff33">${r.xpEarned??0}</td><td style="padding:8px">Cloud</td></tr>`).join('')||'<tr><td colspan="8">अभी कोई online session नहीं है।</td></tr>';
+    showOnly('adminPanel');
+  }catch(e){firebaseNotice('Admin records नहीं खुल पाए: '+e.message+' • Firestore Rules और admin custom claim जाँचें।');}
+};
+if(auth) onAuthStateChanged(auth,async user=>{
+  if(!user)return;
+  try{
+    const snap=await getDoc(doc(db,'players',user.uid));
+    if(snap.exists()){const p=snap.data();data.playerName=p.name||user.displayName||'Player';data.age=Math.max(6,Math.min(15,Number(p.age)||8));data.coins=Number(p.coins)||data.coins;data.xp=Number(p.xp)||data.xp;data.level=Number(p.level)||data.level;data.totalCorrect=Number(p.totalCorrect)||data.totalCorrect;}
+    else {data.playerName=user.displayName||byId('playerName').value||'Player';data.uid=user.uid;}
+    data.loggedIn=true;data.uid=user.uid;localStorage.setItem('FUNPLAY3D_SAVE',JSON.stringify(data));await saveCloudPlayer();renderAges();renderSubjects();updateStats();updateDashboard();
+  }catch(e){console.error('Could not load player profile',e);}
+});
+window.FUNPLAY_FIREBASE_LOGOUT=async()=>{if(auth)await signOut(auth);data.loggedIn=false;data.uid=null;updateDashboard();};
+</script>
+
+</body>
+</html>
